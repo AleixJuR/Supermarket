@@ -5,7 +5,8 @@
         static void Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-            Console.WriteLine("a");
+            Supermarket prova = new Supermarket("PROVA","PROVA2","CASHIERS.TXT","CUSTOMERS.TXT","CASHIERS.TXT",5);
+            prova.MostraClients();
         }
     }
 }
