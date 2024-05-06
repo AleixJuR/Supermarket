@@ -15,6 +15,21 @@ namespace Supermarket
             this.fidelity_Card = fidelityCard;
         }
 
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id, FullName);
+        }
+        public override bool Equals(object? obj)
+        {
+            bool equals = true;
+            if (obj is null) equals = this is null;
+            else if (obj is Customer other)
+            {
+                equals = (this.Id.Equals(other.Id) && this.FullName.Equals(other.FullName));
+            }
+            else equals = false;
+            return equals;
+        }
         public override double GetRating 
         {
             get => TotalInvocied* 0.2; 
@@ -27,7 +42,7 @@ namespace Supermarket
 
         public override void AddPoints(int pointsToAdd)
         {
-            if (FidelityCard != null)
+            if (FidelityCard != null && FullName != "CASH")
             {
                 _points += pointsToAdd;
             }   

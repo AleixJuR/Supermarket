@@ -15,6 +15,22 @@ namespace Supermarket
             _joiningDate = joiningDate;
         }
 
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id, FullName);
+        }
+        public override bool Equals(object? obj)
+        {
+            bool equals = true;
+            if (obj is null) equals = this is null;
+            else if (obj is Cashier other)
+            {
+                equals = (this.Id.Equals(other.Id) && this.FullName.Equals(other.FullName));
+            }
+            else equals = false;
+            return equals;
+        }
+
         public DateTime JoinDate
         {
             get => _joiningDate;
@@ -39,12 +55,13 @@ namespace Supermarket
 
         public override void AddPoints(int pointsToAdd)
         {
-            _points += pointsToAdd * (YearsOfService + 1);
+             _points += pointsToAdd * (YearsOfService + 1);
         }
 
         public override string ToString()
         {
             return $"DNI ->{Id} NOM -> {FullName} \tRATING -> {GetRating} ANTIGUITAT -> {YearsOfService} VENDES ->CANVIAR {base.ToString()}";
         }
+
     }
 }
