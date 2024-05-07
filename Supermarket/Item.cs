@@ -20,7 +20,7 @@ namespace Supermarket
         };
 
         private char currency = '\u20AC';
-        private static int codeInfo = 0;
+        private static int codeInfo = 1;
         private int code;
         private string description;
         private bool onSale;
@@ -30,14 +30,8 @@ namespace Supermarket
         private double stock;
         private int minStock;
 
+
         public Item(string description, int category, char packaging, double price)
-        :this(description,category,packaging,price,MINSTOCK,false)
-        {
-            
-
-        }
-
-        public Item(string description, int category, char packaging, double price, double stock, bool onSale)
         {
             this.code = codeInfo++;
             this.description = description;
@@ -48,7 +42,7 @@ namespace Supermarket
             else if (packaging == 'K') this.packaging = Packaging.Kg;
             else this.packaging = Packaging.Package;
             if (stock < minStock) throw new Exception("S'ha de cumplir l'stock mínim");
-            this.onSale = onSale;
+            this.onSale = false;
         }
         public override int GetHashCode()
         {
@@ -65,6 +59,12 @@ namespace Supermarket
             else equals = false;
             return equals;
         }
+        
+        public char Currency
+        {
+            get => currency;
+        }
+
         public int Code
         {
             get => code;
@@ -103,9 +103,7 @@ namespace Supermarket
         {
             get 
             {
-                double price;
                 if (onSale) price = this.price * 0.9;
-                else price = this.price;
                 return price;
             }
             
@@ -113,11 +111,7 @@ namespace Supermarket
         public override string ToString()
         {
             string saleStatus = OnSale ? $"Y({Price})" : "N";
-
-            return $"Code -> {Code,-10} Description -> {Description,-25} Category -> {GetCategory,-25} Stock: {Stock,-5} MinStock -> {MinStock,-5} Price {this.price,-10}{currency,-10} ON SALE -> {saleStatus}";
-
-
-
+            return $"Code -> {Code,-10} Description -> {Description,-25} Category -> {GetCategory,-25} Stock: {Stock,-5} MinStock -> {MinStock,-5} Price {this.price +""+ currency,-10} ON SALE -> {saleStatus}";
         }
 
         public int CompareTo(Item? other)

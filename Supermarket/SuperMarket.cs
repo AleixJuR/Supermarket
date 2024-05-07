@@ -104,11 +104,61 @@ namespace Supermarket
             return warehouse;
         }
 
-        //public Customer GetAvailableCustomer()
-        //{
-        //    Random r = new Random();
-        //    int customer = r.Next(0, customers.Count);
-        //}
+        public Customer GetAvailableCustomer()
+        {
+            bool trobat = false;
+            Customer cRandom = null;
+            bool algunDisponible = false;
+            Random r = new Random();
+            IEnumerator<KeyValuePair<String,Person>> enumerador = customers.GetEnumerator();    
+            while (enumerador.MoveNext() && !algunDisponible)
+            {
+                if (!enumerador.Current.Value.Active) algunDisponible = true;
+            }
+            if (algunDisponible)
+            {
+                while (!trobat)
+                {
+                    int aleatori = r.Next(0, customers.Count);
+                    string clau = customers.Keys.ElementAt(aleatori);
+                    cRandom = (Customer)customers[clau];
+                    if (!cRandom.Active)
+                    {
+                        trobat = true;
+                        cRandom.Active = true;
+                    }
+                }
+            }
+            return cRandom;
+        }
+
+        public Cashier GetAvailableCashier()
+        {
+            bool trobat = false;
+            Cashier cRandom = null;
+            bool algunDisponible = false;   
+            Random r = new Random();
+            IEnumerator<KeyValuePair<String, Person>> enumerador = staff.GetEnumerator();
+            while (enumerador.MoveNext() && !algunDisponible)
+            {
+                if (!enumerador.Current.Value.Active) algunDisponible = true;
+            }
+            if (algunDisponible)
+            {
+                while (!trobat)
+                {
+                    int aleatori = r.Next(0, staff.Count);
+                    string clau = staff.Keys.ElementAt(aleatori);
+                    cRandom = (Cashier)staff[clau];
+                    if (!cRandom.Active)
+                    {
+                        trobat = true;
+                        cRandom.Active = true;
+                    }
+                }
+            }
+            return cRandom;
+        }
 
         public SortedSet<Item> GetItemsByStock()
         {
@@ -119,6 +169,28 @@ namespace Supermarket
             }
             return items;
         }
+
+        public SortedDictionary<int,Item> Warehouse
+        {
+            get => warehouse;
+        }
+
+        public Dictionary<String,Person> Customers
+        {
+            get => customers;
+        }
+
+        public Dictionary<String,Person> Staff
+        {
+            get => staff;
+        }
+
+        public int ActiveLines
+        {
+            get => activeLines;
+        }
+
+
         public void MostraClients()
         {
             foreach (KeyValuePair<string, Person> prova in customers) 
