@@ -50,7 +50,7 @@ namespace Supermarket
 
         public override string ToString()
         {
-            return $"DNI/NIE->{Id} NOM-> {FullName}\tRATING ->{GetRating}  VENDES->{TotalInvocied}  {base.ToString()}";
+            return $"DNI/NIE -> {Id,-15} NOM -> {FullName,-35} RATING -> {GetRating,-15} VENDES -> {TotalInvocied,-10}{base.ToString()}";
         }
     }
 }

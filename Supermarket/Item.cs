@@ -114,8 +114,10 @@ namespace Supermarket
         {
             string saleStatus = OnSale ? $"Y({Price})" : "N";
 
-            return $"Code -> {Code} Description -> {Description}      Category -> {GetCategory}      Stock: {Stock} MinStock -> {MinStock}" +
-                $" Price {this.price}{currency} ON SALE -> {saleStatus}";
+            return $"Code -> {Code,-10} Description -> {Description,-25} Category -> {GetCategory,-25} Stock: {Stock,-5} MinStock -> {MinStock,-5} Price {this.price,-10}{currency,-10} ON SALE -> {saleStatus}";
+
+
+
         }
 
         public int CompareTo(Item? other)
