@@ -24,7 +24,7 @@ namespace Supermarket
 
         public void AddOne(Item item, double qty)
         {
-            if (item.PackagingType.ToString() != "Kg") Math.Truncate(qty);
+            if (item.PackagingType.ToString() != "Kg" && qty != Math.Truncate(qty)) throw new Exception("No es poden passar decimals si no són Kg");
             if (shoppingList.ContainsKey(item))
                 {
                     shoppingList[item] += qty;
@@ -48,6 +48,7 @@ namespace Supermarket
                     int key = warehouse.Keys.ElementAt(aleatori);
                     iRandom = warehouse[key];
                     double quantitat = r.Next(1, 5);
+                    if (iRandom.PackagingType.ToString() == "Kg") quantitat += Math.Round(r.NextDouble(),2);
                     AddOne(iRandom, quantitat);
                 }
             }

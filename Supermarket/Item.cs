@@ -41,7 +41,8 @@ namespace Supermarket
             if (packaging == 'U') this.packaging = Packaging.Unit;
             else if (packaging == 'K') this.packaging = Packaging.Kg;
             else this.packaging = Packaging.Package;
-            if (stock < minStock) throw new Exception("S'ha de cumplir l'stock mínim");
+            minStock = MINSTOCK;
+            stock = MINSTOCK;
             this.onSale = false;
         }
         public override int GetHashCode()
