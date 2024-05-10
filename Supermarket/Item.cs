@@ -98,7 +98,6 @@ namespace Supermarket
         public static void UpdateStock(Item item, double qty)
         {
             item.stock += qty;
-            if (item.stock < item.minStock) { UpdateStock(item, 5); }
         }
         public double Price
         {
@@ -118,7 +117,7 @@ namespace Supermarket
         public int CompareTo(Item? other)
         {
             int result;
-            if (other == null) result = -1;
+            if (other == null) result = 1;
             else
             {
                 result = this.Stock.CompareTo(other.Stock);

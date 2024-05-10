@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Supermarket
 {
-    public class Supermarket
+    public class SuperMarket
     {
         private string name;
         private string address;
@@ -18,7 +18,7 @@ namespace Supermarket
         private Dictionary<string, Person> staff = new Dictionary<string, Person>();
         private Dictionary<string, Person> customers = new Dictionary<string, Person>();
         private SortedDictionary<int,Item> warehouse = new SortedDictionary<int,Item>();
-        public Supermarket(string name, string address, string fileCashiers, string fileCustomers, string fileItems, int activeLines)
+        public SuperMarket(string name, string address, string fileCashiers, string fileCustomers, string fileItems, int activeLines)
         {
             this.name = name;
             this.address = address;
@@ -27,6 +27,10 @@ namespace Supermarket
             this.customers = LoadCustomers(fileCustomers);
             this.staff = LoadCashiers(fileCashiers);
             this.warehouse = LoadWarehouse(fileItems);
+            for (int i = 0; i<MAXLINES; i++)
+            {
+                lines[i] = new CheckOutLine(GetAvailableCashier(), i + 1);
+            }
             for (int i = 0;i<activeLines;i++)
             {
                 OpenCheckOutLine(i + 1);
@@ -39,13 +43,9 @@ namespace Supermarket
             if (line2Open < 0 || line2Open > MAXLINES) throw new ArgumentException("La línia oberta ha d'estar entre 1 i el màxim");
             if (this.lines[line2Open-1] != null)
             {
-                if (lines[line2Open - 1].Active == true) throw new Exception("La caixa ja és oberta");
+                if (lines[line2Open - 1].Active) throw new Exception("La caixa ja és oberta");
                 lines[line2Open - 1].Active = true;
             } 
-            else
-            {
-                lines[line2Open-1] = new CheckOutLine(GetAvailableCashier(), line2Open);
-            }
         }
 
         public CheckOutLine GetCheckOutLine(int lineNumber)
@@ -89,6 +89,10 @@ namespace Supermarket
 
         }
 
+        public int MaxLines
+        {
+            get => MAXLINES;
+        }
         
         private Dictionary<string,Person> LoadCustomers(string fileName)
         {

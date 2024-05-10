@@ -107,5 +107,19 @@ namespace Supermarket
         {
             get => dateOfPurshase;
         }
+        public override bool Equals(object? obj)
+        {
+            bool result;
+            if (obj == null) result = this is null;
+            else
+            {
+                if (obj is ShoppingCart sc)
+                {
+                    result = this.ShoppingList.Equals(sc.ShoppingList) && this.Customer.Equals(sc.Customer) && dateOfPurshase.Equals(sc.dateOfPurshase);
+                }
+                else result = false;
+            }
+            return result;
+        }
     }
 }

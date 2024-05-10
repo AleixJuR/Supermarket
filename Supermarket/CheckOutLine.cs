@@ -20,13 +20,13 @@ namespace Supermarket
                 cashier = caixer;
                 this.number = number;
                 queue = new Queue<ShoppingCart>();
-                active = true;
+                active = false;
             }
             else throw new ArgumentException("La persona responsable ha de ser un caixer");
         }
         public bool Active
         {
-            get => active; 
+            get => active;
             set => active = value;
         }
 
@@ -34,10 +34,11 @@ namespace Supermarket
         public bool CheckIn(ShoppingCart oneShoppingCart)
         {
             bool result = true;
+            if (queue.Contains(oneShoppingCart)) throw new Exception("Ja hi ha aquest carro de la compra");
             try
             {
                 if (!Active) throw new Exception("Cua Inactiva");
-                queue.Append(oneShoppingCart);
+                queue.Enqueue(oneShoppingCart);
             }
             catch (Exception ex)
             {
@@ -46,6 +47,10 @@ namespace Supermarket
             return result;
         }
 
+        public Queue<ShoppingCart> Queue
+        {
+            get => queue;
+        }
         public bool CheckOut()
         {
             bool result = true;
@@ -69,7 +74,7 @@ namespace Supermarket
 
         public override string ToString()
         {
-            StringBuilder result= new StringBuilder($"NUMERO DE CAIXA --> {this.number}\nCAIXER /A A CÀRREC -> {this.cashier}\n*********\n");
+            StringBuilder result= new StringBuilder($"NUMERO DE CAIXA --> {this.number}\nCAIXER /A A CÀRREC -> {this.cashier.FullName}\n*********\n");
             if (queue.Count == 0) result.Append("CUA BUIDA");
             else
             {

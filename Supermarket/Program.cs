@@ -1,87 +1,308 @@
-﻿namespace Supermarket
+﻿using System.Runtime.InteropServices;
+
+namespace Supermarket
 {
     internal class Program
     {
+        public static void MostrarMenu()
+        {
+            Console.WriteLine("1- UN CLIENT ENTRA AL SUPER I OMPLE EL SEU CARRO DE LA COMPRA");
+            Console.WriteLine("2- AFEGIR UN ARTICLE A UN CARRO DE LA COMPRA");
+            Console.WriteLine("3- UN CARRO PASSA A CUA DE CAIXA (CHECKIN)");
+            Console.WriteLine("4- CHECKOUT DE CUA TRIADA PER L'USUARI");
+            Console.WriteLine("5- OBRIR SEGÜENT CUA DISPONIBLE");
+            Console.WriteLine("6- INFO CUES");
+            Console.WriteLine("7- CLIENTS VOLTANT PEL SUPERMERCAT");
+            Console.WriteLine("8- LLISTAR CLIENTS PER RATING (DESCENDENT)");
+            Console.WriteLine("9- LLISTAR ARTICLES PER STOCK (DE  - A  +)");
+            Console.WriteLine("A- CLOSE QUEUE");
+            Console.WriteLine("0- EXIT");
+        }
         static void Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-            Supermarket prova = new Supermarket("PROVA","PROVA2","CASHIERS.TXT","CUSTOMERS.TXT","GROCERIES.TXT",5);
-            //Console.WriteLine(prova.GetAvailableCashier());
-            //Console.WriteLine(prova.Warehouse[1].PackagingType.ToString());
-            //ShoppingCart test = new ShoppingCart(prova.GetAvailableCustomer(), DateTime.Now);
-            Person clientPerProva = prova.GetAvailableCustomer();
-            Console.WriteLine($"Test del clients -> {clientPerProva.FullName}");
-            Console.WriteLine($"Punts Actuals -> {clientPerProva.Points} S'afegiràn 5 punts");
-            clientPerProva.AddPoints(5);
-            Console.WriteLine($"Punts Actualitzats -> {clientPerProva.Points}");
-            Console.WriteLine($"RATING SENSE HAVER COMPRAT -> {clientPerProva.GetRating}");
-            clientPerProva.AddInvoiceAmount(5);
-            Console.WriteLine($"RANKING AL HAVER FET UNA COMPRA -> {clientPerProva.GetRating}");
-            Console.WriteLine("TEST COMPARABLE DE PERSONES");
-            Person caixer1 = prova.GetAvailableCashier();
-            Person client1 = prova.GetAvailableCustomer();
-            Person caixer2 = prova.GetAvailableCashier();
-            client1.AddInvoiceAmount(5);    
-            client1.AddInvoiceAmount(5);
-            caixer1.AddInvoiceAmount(3);
-            Console.WriteLine("PERSONES A COMPARAR");
-            Console.WriteLine(caixer1);
-            Console.WriteLine(client1);
-            Console.WriteLine(caixer2);
-            Console.WriteLine("ELS AFEGEIXO EN UNA ARRAY I FAIG UN SORT");
-            Person[] persones = new Person[3];
-            persones[0] = caixer1;
-            persones[1] = caixer2;
-            persones[2] = client1;
-            Array.Sort(persones);
-            foreach (Person person in persones)
+
+
+            SuperMarket super = new SuperMarket("HIPERCAR", "C/Barna 99", "CASHIERS.TXT", "CUSTOMERS.TXT", "GROCERIES.TXT", 2);
+            //
+            Dictionary<Customer, ShoppingCart> carrosPassejant = new Dictionary<Customer, ShoppingCart>();
+
+            ConsoleKeyInfo tecla;
+            do
             {
-                Console.WriteLine(person);
+                Console.Clear();
+                MostrarMenu();
+                tecla = Console.ReadKey();
+                switch (tecla.Key)
+                {
+                    case ConsoleKey.D1:
+                        DoNewShoppingCart(carrosPassejant, super);
+                        break;
+                    case ConsoleKey.D2:
+                        DoAfegirUnArticleAlCarro(carrosPassejant, super);
+
+                        break;
+                    case ConsoleKey.D3:
+                        DoCheckIn(carrosPassejant, super);
+
+                        break;
+                    case ConsoleKey.D4:
+                        if (DoCheckOut(super)) Console.WriteLine("BYE BYE. HOPE 2 SEE YOU AGAIN!");
+                        else Console.WriteLine("NO S'HA POGUT TANCAR CAP COMPRA");
+
+                        break;
+                    case ConsoleKey.D5:
+                        DoOpenCua(super);
+
+                        break;
+                    case ConsoleKey.D6:
+                        DoInfoCues(super);
+
+                        break;
+
+                    case ConsoleKey.D7:
+                        DoClientsComprant(carrosPassejant);
+
+
+                        break;
+                    case ConsoleKey.D8:
+                        DoListCustomers(super);
+
+                        break;
+
+                    case ConsoleKey.D9:
+                        SortedSet<Item> articlesOrdenatsPerEstoc = super.GetItemsByStock();
+                        DoListArticlesByStock("LLISTAT D'ARTICLES - DATA " + DateTime.Now, articlesOrdenatsPerEstoc);
+
+                        break;
+                    case ConsoleKey.A:
+                        DoCloseQueue(super);
+
+                        break;
+
+                    case ConsoleKey.D0:
+                        MsgNextScreen("PRESS ANY KEY 2 EXIT");
+                        break;
+                    default:
+                        MsgNextScreen("Error. Prem una tecla per tornar al menú...");
+                        break;
+                }
+
+            } while (tecla.Key != ConsoleKey.D0);
+
+
+        }
+        //OPCIO 1 - Entra un nou client i se li assigna un carro de la compra. S'omple el carro de la compra
+        /// <summary>
+        /// Crea un nou carro de la compra assignat a un Customer inactiu
+        /// L'omple d'articles aleatòriament 
+        /// i l'afegeix als carros que estan passejant pel super
+        /// </summary>
+        /// <param name="carros">Llista de carros que encara no han entrat a cap 
+        /// cua de pagament</param>
+        /// <param name="super">necessari per poder seleccionar un client inactiu</param>
+        public static void DoNewShoppingCart(Dictionary<Customer, ShoppingCart> carros, SuperMarket super)
+        {
+            Console.Clear();
+            Customer client = super.GetAvailableCustomer();
+            carros.Add(client, new ShoppingCart(client, DateTime.Now));
+            carros[client].AddAllRandomly(super.Warehouse);
+            Console.WriteLine(carros[client]);
+            MsgNextScreen("PREM UNA TECLA PER ANAR AL MENÚ PRINCIPAL");
+        }
+
+        //OPCIO 2 - AFEGIR UN ARTICLE ALEATORI A UN CARRO DE LA COMPRA ALEATORI DELS QUE ESTAN VOLTANT PEL SUPER
+        /// <summary>
+        /// Dels carros que van passejant pel super, 
+        /// es selecciona un carro a l'atzar i un article a l'atzar
+        /// i s'afegeix al carro de la compra
+        /// amb una quantitat d'unitats determinada
+        /// Cal mostrar el carro seleccionat abans i després d'afegir l'article.
+        /// </summary>
+        /// <param name="carros">Llista de carros que encara no han entrat a cap 
+        /// cua de pagament</param>
+        /// <param name="super">necessari per poder seleccionar un article del magatzem</param>
+        public static void DoAfegirUnArticleAlCarro(Dictionary<Customer, ShoppingCart> carros, SuperMarket super)
+        {
+            if (carros.Count == 0) throw new Exception("No hi ha carros");
+            Console.Clear();
+            Random r = new Random();
+            int n = r.Next(carros.Count);
+            ShoppingCart seleccionat = carros.Values.ElementAt(n);
+            Console.WriteLine($"CARRO SENSE ACTUALITZAR: \n{seleccionat}");
+            Item iRandom = super.Warehouse.Values.ElementAt(r.Next(super.Warehouse.Count));
+            seleccionat.AddOne(iRandom, r.Next(1, 5));
+            Console.WriteLine($"CARRO ACTUALITZAT: \n{seleccionat}");
+            MsgNextScreen("PREM UNA TECLA PER ANAR AL MENÚ PRINCIPAL");
+
+        }
+        // OPCIO 3 : Un dels carros que van pululant pel super  s'encua a una cua activa
+        // La selecció del carro i de la cua és aleatòria
+        /// <summary>
+        /// Agafem un dels carros passejant (random) i l'encuem a una de les cues actives
+        /// de pagament.
+        /// També hem d'eliminar el carro seleccionat de la llista de carros que passejen 
+        /// Si no hi ha cap carro passejant o no hi ha cap linia activa, cal donar missatge 
+        /// 
+        /// </summary>
+        /// <param name="carros">Llista de carros que encara no han entrat a cap 
+        /// cua de pagament</param>
+        /// <param name="super">necessari per poder encuar un carro a una linia de caixa</param>
+        public static void DoCheckIn(Dictionary<Customer, ShoppingCart> carros, SuperMarket super)
+        {
+            Console.Clear();
+            if (carros.Count == 0) throw new Exception("No hi ha carros passejant");
+            bool repetit = true;
+            Random r = new Random();
+            ShoppingCart cRandom = null;
+            CheckOutLine caixa = null;
+            bool trobat = false;
+            while (!trobat)
+            {
+                caixa = super.GetCheckOutLine(r.Next(1, super.MaxLines));
+                if (caixa.Active) trobat = true;
             }
 
-            Cashier caixer = (Cashier)caixer1;
-            Console.WriteLine($"Years of Service del caixer {caixer.FullName} -> {caixer.YearsOfService}, va entrar el dia {caixer.JoinDate}");
-            Console.ReadKey();
-            Console.Clear();
-            Console.WriteLine("CLASSE ITEM");
-            Item item1 = new Item("Apple", (int)Item.Category.FRUITS, 'U', 1.99);
-            Item item2 = new Item("Milk", (int)Item.Category.MILK_AND_DERIVATIVES, 'P', 2.49);
-            Item item3 = new Item("Bread", (int)Item.Category.BREAD, 'P', 0.99);
-
-            Console.WriteLine("Informació d'items exemple");
-            Console.WriteLine(item1);
-            Console.WriteLine(item2);
-            Console.WriteLine(item3);
-            Console.WriteLine();
+            IEnumerator<ShoppingCart> carrosD = carros.Values.GetEnumerator();
+            bool possible = false;
+            while (carrosD.MoveNext() && !possible) 
+            {
+                if (!caixa.Queue.Contains(carrosD.Current)) possible = true;
+            }
+            if (!possible) throw new Exception("No hi ha cap carro que no estigui ja a la cua");
+            while (repetit)
+            {
+                cRandom = carros.Values.ElementAt(r.Next(carros.Count));
+                if (!caixa.Queue.Contains(cRandom)) repetit = false;
+            }
 
 
-            Item.UpdateStock(item1, 10);
-            Item.UpdateStock(item2, 3);
-            Item.UpdateStock(item3, 5);
-
-
-            Console.WriteLine("Informació després d'actualitzar stock:");
-            Console.WriteLine(item1);
-            Console.WriteLine(item2);
-            Console.WriteLine(item3);
-            Console.WriteLine("Al haver actualitzat l'stock, al afegir en una array, podrem fer un sort que farà servir el compareto");
-            Item[] items = new Item[3];
-            items[0] = item1;
-            items[1] = item2;
-            items[2] = item3;
-            Array.Sort(items);
-            foreach (Item i in items) { Console.WriteLine(i); }
-            Console.WriteLine("LES PROVES ANTERIORS S'HAN FET A PARTIR DE LA CARREGA DELS FITXERS DE SUPERMARKET, AQUEST ES EL TOSTRING AMB TOT EL QUE S'HA AFEGIT");
-            Console.WriteLine("CLICK PER ACCEDIR");
-            Console.ReadKey();
-            Console.Clear();
-            Console.WriteLine("CUSTOMERS");
-            prova.MostraClients();
-            Console.WriteLine("CAIXERS");
-            prova.MostraCashiers();
-            Console.WriteLine("ITEM");
-            prova.MostraItems();
-       
+            caixa.CheckIn(cRandom);
+            Console.WriteLine(caixa);
+            MsgNextScreen("PREM UNA TECLA PER ANAR AL MENÚ PRINCIPAL");
         }
+
+        // OPCIO 4 - CHECK OUT D'UNA CUA TRIADA PER L'USUARI
+        /// <summary>
+        /// Es demana per teclat una cua de les actives (1..ActiveLines)
+        /// i es fa el checkout del ShoppingCart que toqui
+        /// Si no hi ha cap carro a la cua triada, es dona un missatge
+        /// </summary>
+        /// <param name="super">necessari per fer el checkout</param>
+        /// <returns>true si s'ha pogut fer el checkout. False en cas contrari</returns>
+
+        public static bool DoCheckOut(SuperMarket super)
+        {
+            bool fet = true;
+            Console.Clear();
+            MsgNextScreen("PREM UNA TECLA PER ANAR AL MENÚ PRINCIPAL");
+            return fet;
+        }
+        /// <summary>
+        /// En cas que hi hagin cues disponibles per obrir, s'obre la 
+        /// següent linia disponible
+        /// </summary>
+        /// <param name="super"></param>
+        /// <returns>true si s'ha pogut obrir la cua</returns>
+        // OPCIO 5 : Obrir la següent cua disponible (si n'hi ha)
+        public static bool DoOpenCua(SuperMarket super)
+        {
+            bool fet = true;
+            MsgNextScreen("PREM UNA TECLA PER ANAR AL MENÚ PRINCIPAL");
+            return fet;
+        }
+
+        //OPCIO 6 : Llistar les cues actives
+        /// <summary>
+        /// Es llisten totes les cues actives des de la 1 fins a ActiveLines.
+        /// Apretar una tecla després de cada cua activa
+        /// </summary>
+        /// <param name="super"></param>
+        public static void DoInfoCues(SuperMarket super)
+        {
+            Console.Clear();
+
+            MsgNextScreen("PREM UNA TECLA PER CONTINUAR");
+
+        }
+
+
+        // OPCIO 7 - Mostrem tots els carros de la compra que estan voltant
+        // pel super però encara no han anat a cap cua per pagar
+        /// <summary>
+        /// Es mostren tots els carros que no estan en cap cua.
+        /// Cal apretar una tecla després de cada carro
+        /// </summary>
+        /// <param name="carros"></param>
+        public static void DoClientsComprant(Dictionary<Customer, ShoppingCart> carros)
+        {
+            Console.Clear();
+            Console.WriteLine("CARROS VOLTANT PEL SUPER (PENDENTS D'ANAR A PAGAR): ");
+            MsgNextScreen("PREM UNA TECLA PER CONTINUAR");
+
+        }
+
+        //OPCIO 8 : LListat de clients per rating
+        /// <summary>
+        /// Cal llistar tots els clients de més a menys rating
+        /// Per poder veure bé el llistat, primer heu de fer uns quants
+        /// checkouts i un cop fets, fer el llistat. Aleshores els
+        /// clients que han comprat tindran ratings diferents de 0
+        /// Jo he fet una sentencia linq per solucionar aquest apartat
+        /// </summary>
+        /// <param name="super"></param>
+        public static void DoListCustomers(SuperMarket super)
+        {
+
+            Console.Clear();
+
+            MsgNextScreen("PREM UNA TECLA PER CONTINUAR");
+
+        }
+
+        // OPCIO 9
+        /// <summary>
+        /// Llistar de menys a més estoc, tots els articles del magatzem
+        /// </summary>
+        /// <param name="header">Text de capçalera del llistat</param>
+        /// <param name="items">articles que ja vindran preparats en la ordenació desitjada</param>
+        public static void DoListArticlesByStock(String header, SortedSet<Item> items)
+        {
+            Console.Clear();
+            Console.WriteLine(header);
+
+
+            MsgNextScreen("PREM UNA TECLA PER CONTINUAR");
+        }
+
+        // OPCIO A : Tancar cua. Només si no hi ha cap client
+        /// <summary>
+        /// Començant per la última cua disponible, tanca la primera que trobi sense
+        /// cap carro encuat. (primer mirem la número "ActiveLines" després ActiveLines-1 ...
+        /// Fins trobar una que estigui buida. La que trobem la eliminarem
+        /// Cal afegir la propietat Empty a la classe ChecOutLine i  a la classe SuperMarket:
+        /// el mètode public static bool RemoveQueue(Supermarket super, int lineToRemove)
+        /// que elimina la cua amb número = lineToRemove i retorna true en cas que l'hagi 
+        /// pogut eliminar (perquè no hi ha cap carro pendent de pagament)
+        /// </summary>
+        /// <param name="super"></param>
+        public static void DoCloseQueue(SuperMarket super)
+        {
+            Console.Clear();
+
+
+
+            MsgNextScreen("PREM UNA TECLA PER CONTINUAR");
+        }
+
+
+        public static void MsgNextScreen(string msg)
+        {
+            Console.WriteLine(msg);
+            Console.ReadKey();
+        }
+
+
+
     }
 }
