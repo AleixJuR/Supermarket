@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,6 +36,7 @@ namespace Supermarket
 
         public void OpenCheckOutLine(int line2Open)
         {
+            if (line2Open < 0 || line2Open > MAXLINES) throw new ArgumentException("La línia oberta ha d'estar entre 1 i el màxim");
             if (this.lines[line2Open-1] != null)
             {
                 if (lines[line2Open - 1].Active == true) throw new Exception("La caixa ja és oberta");
@@ -42,14 +44,52 @@ namespace Supermarket
             } 
             else
             {
-               // lines[line2Open] = new CheckOutLine(Caixer,line2Open)
+                lines[line2Open-1] = new CheckOutLine(GetAvailableCashier(), line2Open);
             }
         }
 
-        //public bool CheckOut(int line)
-        //{
-        //    return lines[line - 1].CheckOut();
-        //}
+        public CheckOutLine GetCheckOutLine(int lineNumber)
+        {
+            CheckOutLine result;
+            if (lines[lineNumber - 1] == null || lineNumber - 1 > lines.Length || lineNumber - 1 < 0) result = null;
+            else
+            {
+                result = lines[lineNumber - 1];
+            }
+            return result;
+        }
+
+        public bool JoinTheQueue(ShoppingCart theCart, int line)
+        {
+            bool result = true;
+            try
+            {
+                if (lines[line - 1] == null || line - 1 > lines.Length || line - 1 < 0) throw new Exception("Linia no vàlida");
+                lines[line - 1].CheckIn(theCart);
+            }
+            catch(Exception e)
+            {
+                result = false;
+            }
+            return result;
+        }
+        public bool CheckOut(int line)
+        {
+            bool result = true;
+            try
+            {
+                if (lines[line - 1] == null || line - 1 > lines.Length || line - 1 < 0) throw new Exception("Linia no vàlida");
+                lines[line - 1].CheckOut();
+            }
+            catch (Exception e)
+            {
+                result = false;
+            }
+            return result;
+
+        }
+
+        
         private Dictionary<string,Person> LoadCustomers(string fileName)
         {
             Dictionary<string, Person> customers = new Dictionary<string, Person>();
@@ -213,6 +253,11 @@ namespace Supermarket
             {
                 Console.WriteLine(prova.Value);
             }
+        }
+
+        public override string ToString()
+        {
+            return$"{this.name}\n{this.address}\n{lines}";
         }
     }
 }

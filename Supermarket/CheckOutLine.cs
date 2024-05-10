@@ -29,11 +29,57 @@ namespace Supermarket
             get => active; 
             set => active = value;
         }
-        //public bool CheckOut()
-        //{
-        //    bool result = false;
-        //    if (active == false) throw new Exception("La cua no està activa");
-        //    if (queue.Count == 0) throw new Exception("No hi han carros");
-        //}
+
+
+        public bool CheckIn(ShoppingCart oneShoppingCart)
+        {
+            bool result = true;
+            try
+            {
+                if (!Active) throw new Exception("Cua Inactiva");
+                queue.Append(oneShoppingCart);
+            }
+            catch (Exception ex)
+            {
+                result = false;
+            }
+            return result;
+        }
+
+        public bool CheckOut()
+        {
+            bool result = true;
+
+            try
+            {
+                if (!Active) throw new Exception("La cua no està activa");
+                if (queue.Count == 0) throw new Exception("No hi han carros");
+                ShoppingCart desencua = queue.Dequeue();
+                double preuTotal = ShoppingCart.ProcessItems(desencua);
+                
+                //Acabar
+                desencua.Customer.Active = false;
+            }
+            catch (Exception e)
+            {
+                result = false;
+            }
+            return result;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder result= new StringBuilder($"NUMERO DE CAIXA --> {this.number}\nCAIXER /A A CÀRREC -> {this.cashier}\n*********\n");
+            if (queue.Count == 0) result.Append("CUA BUIDA");
+            else
+            {
+                foreach (ShoppingCart compra in queue)
+                {
+                    result.Append(compra);
+                }
+            }
+            return result.ToString();
+
+        }
     }
 }
