@@ -124,15 +124,19 @@ namespace Supermarket
         /// <param name="super">necessari per poder seleccionar un article del magatzem</param>
         public static void DoAfegirUnArticleAlCarro(Dictionary<Customer, ShoppingCart> carros, SuperMarket super)
         {
-            if (carros.Count == 0) throw new Exception("No hi ha carros");
-            Console.Clear();
-            Random r = new Random();
-            int n = r.Next(carros.Count);
-            ShoppingCart seleccionat = carros.Values.ElementAt(n);
-            Console.WriteLine($"CARRO SENSE ACTUALITZAR: \n{seleccionat}");
-            Item iRandom = super.Warehouse.Values.ElementAt(r.Next(super.Warehouse.Count));
-            seleccionat.AddOne(iRandom, r.Next(1, 5));
-            Console.WriteLine($"CARRO ACTUALITZAT: \n{seleccionat}");
+            if (carros.Count == 0) Console.WriteLine("NO HI HA CARROS VOLTANT");
+            else
+            {
+                Console.Clear();
+                Random r = new Random();
+                int n = r.Next(carros.Count);
+                ShoppingCart seleccionat = carros.Values.ElementAt(n);
+                Console.WriteLine($"CARRO SENSE ACTUALITZAR: \n{seleccionat}");
+                Item iRandom = super.Warehouse.Values.ElementAt(r.Next(super.Warehouse.Count));
+                seleccionat.AddOne(iRandom, r.Next(1, 5));
+                Console.WriteLine($"CARRO ACTUALITZAT: \n{seleccionat}");
+            }
+            
             MsgNextScreen("PREM UNA TECLA PER ANAR AL MENÚ PRINCIPAL");
 
         }
@@ -151,34 +155,22 @@ namespace Supermarket
         public static void DoCheckIn(Dictionary<Customer, ShoppingCart> carros, SuperMarket super)
         {
             Console.Clear();
-            if (carros.Count == 0) throw new Exception("No hi ha carros passejant");
-            bool repetit = true;
-            Random r = new Random();
-            ShoppingCart cRandom = null;
-            CheckOutLine caixa = null;
-            bool trobat = false;
-            while (!trobat)
+
+            if (carros.Count == 0) Console.WriteLine("NO HI HA CARROS VOLTANT");
+            else
             {
+                Random r = new Random();
+                Customer cRandomKey = null;
+                ShoppingCart cRandom = null;
+                CheckOutLine caixa = null;
                 caixa = super.GetCheckOutLine(r.Next(1, super.MaxLines));
-                if (caixa.Active) trobat = true;
+                cRandomKey = carros.Keys.ElementAt(r.Next(carros.Count));
+                cRandom = carros[cRandomKey];
+                caixa.CheckIn(cRandom);
+                carros.Remove(cRandomKey);
+                Console.WriteLine(caixa);
             }
-
-            IEnumerator<ShoppingCart> carrosD = carros.Values.GetEnumerator();
-            bool possible = false;
-            while (carrosD.MoveNext() && !possible) 
-            {
-                if (!caixa.Queue.Contains(carrosD.Current)) possible = true;
-            }
-            if (!possible) throw new Exception("No hi ha cap carro que no estigui ja a la cua");
-            while (repetit)
-            {
-                cRandom = carros.Values.ElementAt(r.Next(carros.Count));
-                if (!caixa.Queue.Contains(cRandom)) repetit = false;
-            }
-
-
-            caixa.CheckIn(cRandom);
-            Console.WriteLine(caixa);
+            
             MsgNextScreen("PREM UNA TECLA PER ANAR AL MENÚ PRINCIPAL");
         }
 
@@ -194,7 +186,35 @@ namespace Supermarket
         public static bool DoCheckOut(SuperMarket super)
         {
             bool fet = true;
+            int cua=0;
+            bool correcte = false;
+            CheckOutLine cuaTriada = null;
             Console.Clear();
+            if (super.ActiveLines == 0) 
+            {
+                Console.WriteLine("CAP CUA ACTIVA");
+                fet = false;
+            } 
+            else
+            {
+                while (!correcte)
+                {
+                    try
+                    {
+                        Console.Write($"Tria una cua (1-{super.ActiveLines} --> )");
+                        cua = Convert.ToInt32(Console.ReadLine());
+                        if (cua < 0 || cua > super.ActiveLines) throw new Exception("Cua no vàlida");
+                        correcte = true;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                }
+                cuaTriada = super.GetCheckOutLine(cua);
+                cuaTriada.CheckOut();
+            }
+
             MsgNextScreen("PREM UNA TECLA PER ANAR AL MENÚ PRINCIPAL");
             return fet;
         }
@@ -208,6 +228,12 @@ namespace Supermarket
         public static bool DoOpenCua(SuperMarket super)
         {
             bool fet = true;
+            if (super.ActiveLines < super.MaxLines)
+            {
+                super.OpenCheckOutLine(super.ActiveLines+1);
+                Console.WriteLine(super.GetCheckOutLine(super.ActiveLines));
+            }
+            else fet = false;
             MsgNextScreen("PREM UNA TECLA PER ANAR AL MENÚ PRINCIPAL");
             return fet;
         }
@@ -221,7 +247,10 @@ namespace Supermarket
         public static void DoInfoCues(SuperMarket super)
         {
             Console.Clear();
-
+            for (int i = 0; i < super.ActiveLines;i++)
+            {
+                Console.WriteLine(super.GetCheckOutLine(i + 1));
+            }
             MsgNextScreen("PREM UNA TECLA PER CONTINUAR");
 
         }
@@ -237,7 +266,10 @@ namespace Supermarket
         public static void DoClientsComprant(Dictionary<Customer, ShoppingCart> carros)
         {
             Console.Clear();
-            Console.WriteLine("CARROS VOLTANT PEL SUPER (PENDENTS D'ANAR A PAGAR): ");
+            foreach (KeyValuePair<Customer,ShoppingCart> voltant in carros)
+            {
+                Console.WriteLine(voltant.Value);
+            }
             MsgNextScreen("PREM UNA TECLA PER CONTINUAR");
 
         }
@@ -255,7 +287,7 @@ namespace Supermarket
         {
 
             Console.Clear();
-
+            
             MsgNextScreen("PREM UNA TECLA PER CONTINUAR");
 
         }
@@ -270,8 +302,7 @@ namespace Supermarket
         {
             Console.Clear();
             Console.WriteLine(header);
-
-
+            foreach (Item i in items) Console.WriteLine(i);
             MsgNextScreen("PREM UNA TECLA PER CONTINUAR");
         }
 

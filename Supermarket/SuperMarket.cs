@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,7 +34,7 @@ namespace Supermarket
             }
             for (int i = 0;i<activeLines;i++)
             {
-                OpenCheckOutLine(i + 1);
+                lines[i].Active = true;
             }
             
         }
@@ -45,6 +46,7 @@ namespace Supermarket
             {
                 if (lines[line2Open - 1].Active) throw new Exception("La caixa ja és oberta");
                 lines[line2Open - 1].Active = true;
+                activeLines++;
             } 
         }
 
@@ -211,6 +213,7 @@ namespace Supermarket
             {
                 items.Add(item.Value);
             }
+
             return items;
         }
 

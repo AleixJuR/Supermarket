@@ -34,6 +34,7 @@ namespace Supermarket
         public Item(string description, int category, char packaging, double price)
         {
             this.code = codeInfo++;
+            Random r = new Random();
             this.description = description;
             //this.onSale = onSale;
             this.price = price;
@@ -41,17 +42,17 @@ namespace Supermarket
             if (packaging == 'U') this.packaging = Packaging.Unit;
             else if (packaging == 'K') this.packaging = Packaging.Kg;
             else this.packaging = Packaging.Package;
-            minStock = MINSTOCK;
-            stock = MINSTOCK;
+            minStock = r.Next(20)+1;
+            stock = r.Next(MinStock,200);
             this.onSale = false;
         }
         public override int GetHashCode()
         {
-            return HashCode.Combine(Code);
+            return HashCode.Combine(Code,description);
         }
         public override bool Equals(object? obj)
         {
-            bool equals = true;
+            bool equals;
             if (obj is null) equals = this is null;
             else if (obj is Item other)
             {
@@ -121,9 +122,11 @@ namespace Supermarket
             else
             {
                 result = this.Stock.CompareTo(other.Stock);
+                if (result == 0) result = Code.CompareTo(other.Code);
             }
             return result;
         }
+
 
        
     }
