@@ -44,7 +44,7 @@ namespace Supermarket
             else this.packaging = Packaging.Package;
             minStock = r.Next(20)+1;
             stock = r.Next(MinStock,200);
-            this.onSale = false;
+            this.onSale = r.Next(5) + 1 == 4;
         }
         public override int GetHashCode()
         {
@@ -104,15 +104,16 @@ namespace Supermarket
         {
             get 
             {
-                if (onSale) price = this.price * 0.9;
-                return price;
+                double priceR = price;
+                if (onSale) priceR = this.price * 0.9;
+                return Math.Round(priceR,2);
             }
             
         }
         public override string ToString()
         {
             string saleStatus = OnSale ? $"Y({Price})" : "N";
-            return $"Code -> {Code,-10} Description -> {Description,-25} Category -> {GetCategory,-25} Stock: {Stock,-5} MinStock -> {MinStock,-5} Price {this.price +""+ currency,-10} ON SALE -> {saleStatus}";
+            return $"Code -> {Code,-10} Description -> {Description,-25} Category -> {GetCategory,-25} Stock: {Stock,-5} MinStock -> {MinStock,-5} Price {Math.Round(this.price) +""+ currency,-10} ON SALE -> {saleStatus}";
         }
 
         public int CompareTo(Item? other)

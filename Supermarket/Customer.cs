@@ -35,6 +35,7 @@ namespace Supermarket
             get => TotalInvocied* 0.2; 
         }
 
+
         public int? FidelityCard
         {
             get => fidelity_Card;
@@ -50,7 +51,7 @@ namespace Supermarket
 
         public override string ToString()
         {
-            return $"DNI -> {Id,-15} NOM -> {FullName,-35} RATING -> {GetRating,-15} VENDES -> {TotalInvocied,-10}{base.ToString()}";
+            return $"DNI -> {Id,-15} NOM -> {FullName,-35} RATING -> {Math.Round(GetRating,2),-15} VENDES -> {TotalInvocied,-10}{base.ToString()}";
         }
     }
 }

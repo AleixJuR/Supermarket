@@ -47,8 +47,10 @@ namespace Supermarket
 
                         break;
                     case ConsoleKey.D4:
+                        Console.Clear();
                         if (DoCheckOut(super)) Console.WriteLine("BYE BYE. HOPE 2 SEE YOU AGAIN!");
                         else Console.WriteLine("NO S'HA POGUT TANCAR CAP COMPRA");
+                        MsgNextScreen("PREM UNA TECLA PER ANAR AL MENÚ PRINCIPAL");
 
                         break;
                     case ConsoleKey.D5:
@@ -155,15 +157,15 @@ namespace Supermarket
         public static void DoCheckIn(Dictionary<Customer, ShoppingCart> carros, SuperMarket super)
         {
             Console.Clear();
-
-            if (carros.Count == 0) Console.WriteLine("NO HI HA CARROS VOLTANT");
+            if (super.ActiveLines == 0) Console.WriteLine("NO HI HA CAP CAIXA");
+            else if (carros.Count == 0) Console.WriteLine("NO HI HA CARROS VOLTANT");
             else
             {
                 Random r = new Random();
                 Customer cRandomKey = null;
                 ShoppingCart cRandom = null;
                 CheckOutLine caixa = null;
-                caixa = super.GetCheckOutLine(r.Next(1, super.MaxLines));
+                caixa = super.GetCheckOutLine(r.Next(super.ActiveLines)+1);
                 cRandomKey = carros.Keys.ElementAt(r.Next(carros.Count));
                 cRandom = carros[cRandomKey];
                 caixa.CheckIn(cRandom);
@@ -189,7 +191,7 @@ namespace Supermarket
             int cua=0;
             bool correcte = false;
             CheckOutLine cuaTriada = null;
-            Console.Clear();
+            CheckOutLine cuaCKOut = null;
             if (super.ActiveLines == 0) 
             {
                 Console.WriteLine("CAP CUA ACTIVA");
@@ -204,18 +206,24 @@ namespace Supermarket
                         Console.Write($"Tria una cua (1-{super.ActiveLines} --> )");
                         cua = Convert.ToInt32(Console.ReadLine());
                         if (cua < 0 || cua > super.ActiveLines) throw new Exception("Cua no vàlida");
+                        cuaCKOut = super.GetCheckOutLine(cua);
+                        if (cuaCKOut.Queue.Count == 0) fet = false;
+                        else
+                        {
+                            cuaCKOut.CheckOut();
+                        }
                         correcte = true;
                     }
                     catch (Exception e)
                     {
                         Console.WriteLine(e);
+                        fet = false;
                     }
                 }
                 cuaTriada = super.GetCheckOutLine(cua);
                 cuaTriada.CheckOut();
             }
 
-            MsgNextScreen("PREM UNA TECLA PER ANAR AL MENÚ PRINCIPAL");
             return fet;
         }
         /// <summary>
@@ -287,7 +295,10 @@ namespace Supermarket
         {
 
             Console.Clear();
-            
+            List<Customer> list = new List<Customer>(); 
+            foreach (Customer c in super.Customers.Values) list.Add(c);
+            list.Sort();
+            foreach (Customer c in list) Console.WriteLine(c);
             MsgNextScreen("PREM UNA TECLA PER CONTINUAR");
 
         }
@@ -320,9 +331,24 @@ namespace Supermarket
         public static void DoCloseQueue(SuperMarket super)
         {
             Console.Clear();
-
-
-
+            bool success = false;
+            CheckOutLine liniaATancar = null;
+            int linia = super.ActiveLines;
+            while (!success && linia > 0)
+            {
+                bool res = SuperMarket.RemoveQueue(super, linia);
+                if (res)
+                {
+                    Console.WriteLine($"Cua {linia} eliminada correctament");
+                    success = true;
+                }
+                else 
+                {
+                    linia--;
+                    res = SuperMarket.RemoveQueue(super, linia);
+                }
+            }
+            if (linia < 0) Console.WriteLine("No s'ha pogut tancar cap línia");
             MsgNextScreen("PREM UNA TECLA PER CONTINUAR");
         }
 

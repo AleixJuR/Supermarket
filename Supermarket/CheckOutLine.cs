@@ -30,6 +30,10 @@ namespace Supermarket
             set => active = value;
         }
 
+        public Person Cashier
+        {
+            get => cashier;
+        }
 
         public bool CheckIn(ShoppingCart oneShoppingCart)
         {
@@ -47,6 +51,12 @@ namespace Supermarket
             return result;
         }
 
+        public bool Empty
+        {
+            get => queue.Count == 0;
+        }
+
+
         public Queue<ShoppingCart> Queue
         {
             get => queue;
@@ -61,7 +71,11 @@ namespace Supermarket
                 if (queue.Count == 0) throw new Exception("No hi han carros");
                 ShoppingCart desencua = queue.Dequeue();
                 double preuTotal = ShoppingCart.ProcessItems(desencua);
-                
+                int punts = desencua.RawPointsObtainedAtCheckout(preuTotal);
+                desencua.Customer.AddInvoiceAmount(preuTotal);
+                cashier.AddInvoiceAmount(preuTotal);
+                desencua.Customer.AddPoints(punts);
+                this.cashier.AddPoints(punts);
                 //Acabar
                 desencua.Customer.Active = false;
             }

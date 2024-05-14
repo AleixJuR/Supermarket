@@ -21,6 +21,7 @@ namespace Supermarket
         private SortedDictionary<int,Item> warehouse = new SortedDictionary<int,Item>();
         public SuperMarket(string name, string address, string fileCashiers, string fileCustomers, string fileItems, int activeLines)
         {
+            Random r = new Random();
             this.name = name;
             this.address = address;
             if (activeLines > MAXLINES) throw new ArgumentException("No poden haver més línies del màxim");
@@ -31,11 +32,9 @@ namespace Supermarket
             for (int i = 0; i<MAXLINES; i++)
             {
                 lines[i] = new CheckOutLine(GetAvailableCashier(), i + 1);
+                if (i < activeLines) lines[i].Active = true;
             }
-            for (int i = 0;i<activeLines;i++)
-            {
-                lines[i].Active = true;
-            }
+
             
         }
 
@@ -176,6 +175,28 @@ namespace Supermarket
                 }
             }
             return cRandom;
+        }
+
+        public static bool RemoveQueue(SuperMarket super, int lineToRemove)
+        {
+            bool result = true;
+            try
+            {
+                if (lineToRemove < 0 || lineToRemove > MAXLINES) throw new ArgumentException("Linia no vàlida");
+                if (!super.lines[lineToRemove - 1].Active) throw new ArgumentException("La línia ja és tancada");
+                if (super.lines[lineToRemove - 1].Empty) result = false;
+                else 
+                {
+                    super.lines[lineToRemove - 1].Cashier.Active = false;
+                    super.lines[lineToRemove - 1] = default(CheckOutLine);
+                    super.activeLines--;
+                }
+
+            } catch (Exception e)
+            {
+                result = false;
+            }
+            return result;
         }
 
         public Cashier GetAvailableCashier()

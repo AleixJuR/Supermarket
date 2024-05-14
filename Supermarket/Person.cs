@@ -50,7 +50,7 @@ namespace Supermarket
             if (other is null) result = -1;
             else
             {
-                result = this.GetRating.CompareTo(other.GetRating);
+                result = other.GetRating.CompareTo(this.GetRating);
             }
             return result;
         }
