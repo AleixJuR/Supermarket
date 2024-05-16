@@ -274,6 +274,7 @@ namespace Supermarket
         public static void DoClientsComprant(Dictionary<Customer, ShoppingCart> carros)
         {
             Console.Clear();
+            if (carros.Count == 0) Console.WriteLine("NO HI CAP CAP CARRO VOLTANT PEL SUPERMERCAT");
             foreach (KeyValuePair<Customer,ShoppingCart> voltant in carros)
             {
                 Console.WriteLine(voltant.Value);
@@ -348,7 +349,7 @@ namespace Supermarket
                     res = SuperMarket.RemoveQueue(super, linia);
                 }
             }
-            if (linia < 0) Console.WriteLine("No s'ha pogut tancar cap línia");
+            if (linia == 0) Console.WriteLine("No s'ha pogut tancar cap línia");
             MsgNextScreen("PREM UNA TECLA PER CONTINUAR");
         }
 
