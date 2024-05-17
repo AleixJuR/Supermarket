@@ -32,7 +32,11 @@ namespace Supermarket
             for (int i = 0; i<MAXLINES; i++)
             {
                 lines[i] = new CheckOutLine(GetAvailableCashier(), i + 1);
-                if (i < activeLines) lines[i].Active = true;
+                if (i < this.activeLines) 
+                {
+                    OpenCheckOutLine(i + 1);
+                    this.activeLines--;
+                }
             }
 
             
@@ -45,7 +49,7 @@ namespace Supermarket
             {
                 if (lines[line2Open - 1].Active) throw new Exception("La caixa ja és oberta");
                 lines[line2Open - 1].Active = true;
-                activeLines++;
+                this.activeLines++;
             } 
         }
 

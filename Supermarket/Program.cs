@@ -333,7 +333,6 @@ namespace Supermarket
         {
             Console.Clear();
             bool success = false;
-            CheckOutLine liniaATancar = null;
             int linia = super.ActiveLines;
             while (!success && linia > 0)
             {
